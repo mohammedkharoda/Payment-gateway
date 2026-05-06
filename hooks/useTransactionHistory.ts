@@ -4,9 +4,11 @@ import type { Currency, Transaction } from "@/types";
 
 export function useTransactionHistory() {
   const transactionHistory = usePaymentStore((s) => s.transactionHistory);
+  const hasHydrated = usePaymentStore((s) => s.hasHydrated);
   const addToHistory = usePaymentStore((s) => s.addToHistory);
 
   function addTransaction(tx: {
+    transactionId: string;
     cardHolder: string;
     cardNumber: string;
     amount: number;
@@ -14,7 +16,7 @@ export function useTransactionHistory() {
     status: "success" | "failed";
   }) {
     const record: Transaction = {
-      id: crypto.randomUUID(),
+      id: tx.transactionId,
       cardHolder: tx.cardHolder,
       cardLastFour: tx.cardNumber.replace(/\s/g, "").slice(-4),
       cardType: detectCardType(tx.cardNumber),
@@ -31,5 +33,5 @@ export function useTransactionHistory() {
     usePaymentStore.setState({ transactionHistory: [] });
   }
 
-  return { transactions: transactionHistory, addTransaction, clear };
+  return { transactions: transactionHistory, hasHydrated, addTransaction, clear };
 }

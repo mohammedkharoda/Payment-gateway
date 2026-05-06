@@ -23,6 +23,7 @@ interface PaymentState extends PaymentFormFields {
   currentTransaction: CurrentTransaction | null;
   retryCount: number;
   errorMessage: string;
+  hasHydrated: boolean;
 
   // Form UI state
   status: PaymentStatus;
@@ -38,6 +39,7 @@ interface PaymentState extends PaymentFormFields {
   incrementRetry: () => void;
   resetRetry: () => void;
   addToHistory: (tx: Transaction) => void;
+  setHasHydrated: (hasHydrated: boolean) => void;
   setField: (field: keyof PaymentFormFields, value: string) => void;
   setErrors: (errors: ValidationErrors) => void;
   setErrorMessage: (msg: string) => void;
@@ -63,6 +65,7 @@ export const usePaymentStore = create<PaymentState>()(
       currentTransaction: null,
       retryCount: 0,
       errorMessage: "",
+      hasHydrated: false,
 
       status: "idle",
       errors: {},
@@ -86,9 +89,18 @@ export const usePaymentStore = create<PaymentState>()(
       resetRetry: () => set({ retryCount: 0 }),
 
       addToHistory: (tx) =>
-        set((s) => ({
-          transactionHistory: [tx, ...s.transactionHistory].slice(0, 50),
-        })),
+        set((s) => {
+          const existing = s.transactionHistory.findIndex((t) => t.id === tx.id);
+          if (existing !== -1) {
+            // Retry — update status/timestamp in place, keep position
+            const next = [...s.transactionHistory];
+            next[existing] = tx;
+            return { transactionHistory: next };
+          }
+          return { transactionHistory: [tx, ...s.transactionHistory].slice(0, 50) };
+        }),
+
+      setHasHydrated: (hasHydrated) => set({ hasHydrated }),
 
       setField: (field, value) =>
         set((s) => ({
@@ -112,8 +124,11 @@ export const usePaymentStore = create<PaymentState>()(
     }),
     {
       name: "payment-store",
-      // Only persist history — form fields and in-flight state are transient
+      // Only persist history - form fields and in-flight state are transient
       partialize: (s) => ({ transactionHistory: s.transactionHistory }),
+      onRehydrateStorage: () => (state) => {
+        state?.setHasHydrated(true);
+      },
     }
   )
 );

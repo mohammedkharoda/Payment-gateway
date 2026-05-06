@@ -1,7 +1,9 @@
-import type { PaymentPayload, PaymentApiResponse, PaymentProcessingStatus } from "@/types";
+import type { PaymentPayload, PaymentApiResponse } from "@/types";
+
+export type TerminalOutcome = "Success" | "Failed" | "Timeout";
 
 export interface ApiResult {
-  outcome: PaymentProcessingStatus;
+  outcome: TerminalOutcome;
   data?: PaymentApiResponse;
   reason?: string;
 }
