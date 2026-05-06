@@ -1,51 +1,35 @@
-import { create } from "zustand";
-import { persist } from "zustand/middleware";
-import type { Transaction, CardType, Currency } from "@/types";
+import { usePaymentStore } from "@/store/paymentStore";
 import { detectCardType } from "@/utils/cardUtils";
+import type { Currency, Transaction } from "@/types";
 
-interface TransactionHistoryState {
-  transactions: Transaction[];
-  addTransaction: (tx: {
+export function useTransactionHistory() {
+  const transactionHistory = usePaymentStore((s) => s.transactionHistory);
+  const addToHistory = usePaymentStore((s) => s.addToHistory);
+
+  function addTransaction(tx: {
     cardHolder: string;
     cardNumber: string;
     amount: number;
     currency: Currency;
     status: "success" | "failed";
-  }) => void;
-  clear: () => void;
-}
+  }) {
+    const record: Transaction = {
+      id: crypto.randomUUID(),
+      cardHolder: tx.cardHolder,
+      cardLastFour: tx.cardNumber.replace(/\s/g, "").slice(-4),
+      cardType: detectCardType(tx.cardNumber),
+      amount: tx.amount,
+      currency: tx.currency,
+      status: tx.status,
+      timestamp: new Date(),
+    };
+    addToHistory(record);
+  }
 
+  function clear() {
+    // Clear by replacing with empty — store slice handles persistence
+    usePaymentStore.setState({ transactionHistory: [] });
+  }
 
-// Zustand store for transaction history
-const useTransactionStore = create<TransactionHistoryState>()(
-  persist(
-    (set) => ({
-      transactions: [],
-      addTransaction: (tx) =>
-        set((state) => ({
-          transactions: [
-            {
-              // Generate a unique ID for each transaction
-              id: crypto.randomUUID(),
-              cardHolder: tx.cardHolder,
-              cardLastFour: tx.cardNumber.replace(/\s/g, "").slice(-4),
-              cardType: detectCardType(tx.cardNumber) as CardType,
-              amount: tx.amount,
-              currency: tx.currency,
-              status: tx.status,
-              timestamp: new Date(),
-            },
-            ...state.transactions,
-          ].slice(0, 50),
-        })),
-      clear: () => set({ transactions: [] }),
-    }),
-    { name: "tx-history" }
-  )
-);
-
-// Custom hook to use transaction history store
-
-export function useTransactionHistory() {
-  return useTransactionStore();
+  return { transactions: transactionHistory, addTransaction, clear };
 }

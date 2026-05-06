@@ -1,7 +1,13 @@
 import { create } from "zustand";
-import type { PaymentStatus, Currency, ValidationErrors } from "@/types";
+import { persist } from "zustand/middleware";
+import type { PaymentProcessingStatus, PaymentStatus, Currency, ValidationErrors, Transaction, PaymentPayload } from "@/types";
 
-interface PaymentFormState {
+interface CurrentTransaction {
+  payload: PaymentPayload;
+  startedAt: number;
+}
+
+interface PaymentFormFields {
   cardNumber: string;
   cardHolder: string;
   expiryMonth: string;
@@ -9,45 +15,105 @@ interface PaymentFormState {
   cvv: string;
   amount: string;
   currency: Currency;
-  status: PaymentStatus;
-  errors: ValidationErrors;
+}
+
+interface PaymentState extends PaymentFormFields {
+  // Processing state
+  processingStatus: PaymentProcessingStatus;
+  currentTransaction: CurrentTransaction | null;
+  retryCount: number;
   errorMessage: string;
 
-  setField: (field: keyof Omit<PaymentFormState, "status" | "errors" | "errorMessage" | "setField" | "setStatus" | "setErrors" | "setErrorMessage" | "reset">, value: string) => void;
+  // Form UI state
+  status: PaymentStatus;
+  errors: ValidationErrors;
+
+  // History (persisted to localStorage)
+  transactionHistory: Transaction[];
+
+  // Actions
+  startPayment: (payload: PaymentPayload) => void;
   setStatus: (status: PaymentStatus) => void;
+  setProcessingStatus: (s: PaymentProcessingStatus) => void;
+  incrementRetry: () => void;
+  resetRetry: () => void;
+  addToHistory: (tx: Transaction) => void;
+  setField: (field: keyof PaymentFormFields, value: string) => void;
   setErrors: (errors: ValidationErrors) => void;
   setErrorMessage: (msg: string) => void;
   reset: () => void;
 }
 
-const initialState = {
+const FORM_DEFAULTS: PaymentFormFields = {
   cardNumber: "",
   cardHolder: "",
   expiryMonth: "",
   expiryYear: "",
   cvv: "",
   amount: "",
-  currency: "USD" as Currency,
-  status: "idle" as PaymentStatus,
-  errors: {} as ValidationErrors,
-  errorMessage: "",
+  currency: "USD",
 };
 
-export const usePaymentStore = create<PaymentFormState>((set) => ({
-  ...initialState,
+export const usePaymentStore = create<PaymentState>()(
+  persist(
+    (set) => ({
+      ...FORM_DEFAULTS,
 
-  setField: (field, value) =>
-    set((state) => ({
-      ...state,
-      [field]: value,
-      errors: { ...state.errors, [field]: undefined },
-    })),
+      processingStatus: "Idle",
+      currentTransaction: null,
+      retryCount: 0,
+      errorMessage: "",
 
-  setStatus: (status) => set({ status }),
+      status: "idle",
+      errors: {},
 
-  setErrors: (errors) => set({ errors }),
+      transactionHistory: [],
 
-  setErrorMessage: (errorMessage) => set({ errorMessage }),
+      startPayment: (payload) =>
+        set({
+          currentTransaction: { payload, startedAt: Date.now() },
+          processingStatus: "Processing",
+          status: "loading",
+          errorMessage: "",
+        }),
 
-  reset: () => set({ ...initialState }),
-}));
+      setStatus: (status) => set({ status }),
+
+      setProcessingStatus: (processingStatus) => set({ processingStatus }),
+
+      incrementRetry: () => set((s) => ({ retryCount: s.retryCount + 1 })),
+
+      resetRetry: () => set({ retryCount: 0 }),
+
+      addToHistory: (tx) =>
+        set((s) => ({
+          transactionHistory: [tx, ...s.transactionHistory].slice(0, 50),
+        })),
+
+      setField: (field, value) =>
+        set((s) => ({
+          [field]: value,
+          errors: { ...s.errors, [field]: undefined },
+        })),
+
+      setErrors: (errors) => set({ errors }),
+
+      setErrorMessage: (errorMessage) => set({ errorMessage }),
+
+      reset: () =>
+        set({
+          ...FORM_DEFAULTS,
+          processingStatus: "Idle",
+          currentTransaction: null,
+          status: "idle",
+          errors: {},
+          errorMessage: "",
+        }),
+    }),
+    {
+      name: "payment-store",
+      // Only persist history — form fields and in-flight state are transient
+      partialize: (s) => ({ transactionHistory: s.transactionHistory }),
+    }
+  )
+);

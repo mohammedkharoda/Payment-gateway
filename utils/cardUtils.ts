@@ -69,13 +69,3 @@ export function luhnCheck(number: string): boolean {
   }, 0);
   return sum % 10 === 0;
 }
-
-// Validate the card number and return an error message if invalid
-export function validateCardNumber(number: string): string | null {
-  const clean = number.replace(/\s/g, "");
-  const type = detectCardType(clean);
-  if (type === "unknown") return "Unsupported card type";
-  if (clean.length !== getCardLength(type)) return `Card number must be ${getCardLength(type)} digits`;
-  if (!luhnCheck(clean)) return "Invalid card number";
-  return null;
-}

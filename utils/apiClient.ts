@@ -1,33 +1,40 @@
-import type { PaymentPayload, Transaction } from "@/types";
+import type { PaymentPayload, PaymentApiResponse, PaymentProcessingStatus } from "@/types";
 
-export interface ApiResponse<T> {
-  data?: T;
-  error?: string;
+export interface ApiResult {
+  outcome: PaymentProcessingStatus;
+  data?: PaymentApiResponse;
+  reason?: string;
 }
 
 export async function postPayment(
+  transactionId: string,
   payload: PaymentPayload,
   signal?: AbortSignal
-): Promise<ApiResponse<Transaction>> {
+): Promise<ApiResult> {
   try {
     const res = await fetch("/api/pay", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
+      body: JSON.stringify({ transactionId, ...payload }),
       signal,
     });
 
-    const json = await res.json();
+    const json: PaymentApiResponse = await res.json();
 
-    if (!res.ok) {
-      return { error: json.message ?? "Payment failed" };
+    switch (json.outcome) {
+      case "success":
+        return { outcome: "Success", data: json };
+      case "failed":
+        return { outcome: "Failed", reason: json.reason };
+      case "timeout":
+        return { outcome: "Timeout" };
+      case "validation_error":
+        return { outcome: "Failed", reason: "Validation failed" };
     }
-
-    return { data: json };
   } catch (err) {
     if (err instanceof DOMException && err.name === "AbortError") {
-      return { error: "Request cancelled" };
+      return { outcome: "Failed", reason: "Request cancelled" };
     }
-    return { error: "Network error. Try again." };
+    return { outcome: "Failed", reason: "Network error. Try again." };
   }
 }
