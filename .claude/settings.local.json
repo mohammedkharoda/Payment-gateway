@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx create-next-app@latest . --typescript --tailwind --app --no-src-dir --no-eslint --import-alias \"@/*\" --yes)",
+      "Read(//d/Codes/**)",
+      "Bash(npx create-next-app@latest assignment --typescript --tailwind --app --no-src-dir --no-eslint --import-alias \"@/*\" --yes)"
+    ]
+  }
+}
