@@ -75,7 +75,7 @@ export function StatusScreen({
         aria-live="polite"
         className="rounded-[28px] border border-emerald-100 bg-emerald-50/75 px-6 py-10 text-center shadow-inner"
       >
-        <div className="mx-auto flex h-[72px] w-[72px] items-center justify-center rounded-full bg-white text-emerald-600 shadow-sm">
+        <div className="mx-auto flex h-18 w-18 items-center justify-center rounded-full bg-white text-emerald-600 shadow-sm">
           <CheckCircle className="h-10 w-10" aria-hidden="true" />
         </div>
         <h2
@@ -123,7 +123,7 @@ export function StatusScreen({
     >
       <div
         className={[
-          "mx-auto flex h-[72px] w-[72px] items-center justify-center rounded-full bg-white shadow-sm",
+          "mx-auto flex h-18 w-18 items-center justify-center rounded-full bg-white shadow-sm",
           isTimeout ? "text-amber-600" : "text-rose-600",
         ].join(" ")}
       >

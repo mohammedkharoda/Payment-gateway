@@ -119,11 +119,11 @@ export default function Home() {
   }, [amount, currency, enqueueToast, errorMessage, processingStatus]);
 
   return (
-    <main className="relative min-h-screen overflow-hidden bg-[radial-gradient(circle_at_top_left,_rgba(45,212,191,0.18),_transparent_28%),radial-gradient(circle_at_80%_15%,_rgba(125,211,252,0.22),_transparent_24%),linear-gradient(135deg,_#f8fafc_0%,_#eef2ff_46%,_#ecfeff_100%)] py-6 pl-[max(1.25rem,env(safe-area-inset-left))] pr-[max(1.25rem,env(safe-area-inset-right))] sm:px-6 sm:py-8 lg:px-8">
+    <main className="relative min-h-screen overflow-hidden bg-[radial-gradient(circle_at_top_left,rgba(45,212,191,0.18),transparent_28%),radial-gradient(circle_at_80%_15%,rgba(125,211,252,0.22),transparent_24%),linear-gradient(135deg,#f8fafc_0%,#eef2ff_46%,#ecfeff_100%)] py-6 pl-[max(1.25rem,env(safe-area-inset-left))] pr-[max(1.25rem,env(safe-area-inset-right))] sm:px-6 sm:py-8 lg:px-8">
       <FeedbackToasts toasts={toasts} onDismiss={dismissToast} />
-      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgba(148,163,184,0.08)_1px,transparent_1px),linear-gradient(90deg,rgba(148,163,184,0.08)_1px,transparent_1px)] bg-[size:36px_36px] [mask-image:linear-gradient(to_bottom,white,transparent)]" />
-      <div className="pointer-events-none absolute left-[-8rem] top-16 h-64 w-64 rounded-full bg-cyan-200/35 blur-3xl" />
-      <div className="pointer-events-none absolute right-[-5rem] top-24 h-72 w-72 rounded-full bg-sky-200/30 blur-3xl" />
+      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgba(148,163,184,0.08)_1px,transparent_1px),linear-gradient(90deg,rgba(148,163,184,0.08)_1px,transparent_1px)] bg-size-[36px_36px] mask-[linear-gradient(to_bottom,white,transparent)]" />
+      <div className="pointer-events-none absolute -left-32 top-16 h-64 w-64 rounded-full bg-cyan-200/35 blur-3xl" />
+      <div className="pointer-events-none absolute -right-20 top-24 h-72 w-72 rounded-full bg-sky-200/30 blur-3xl" />
 
       <div className="relative mx-auto flex w-full max-w-6xl flex-col gap-5 sm:gap-8">
         <section className="grid gap-4 lg:grid-cols-[1.15fr_0.85fr] lg:items-end">
@@ -164,7 +164,7 @@ export default function Home() {
           className="relative overflow-hidden rounded-[22px] border border-white/80 bg-white/88 p-4 shadow-[0_28px_90px_-40px_rgba(15,23,42,0.45)] backdrop-blur sm:rounded-[28px] sm:p-6 xl:p-7"
           onSubmit={handleSubmit}
         >
-          <div className="pointer-events-none absolute inset-x-0 top-0 h-32 bg-[radial-gradient(circle_at_top,_rgba(45,212,191,0.16),_transparent_68%)]" />
+          <div className="pointer-events-none absolute inset-x-0 top-0 h-32 bg-[radial-gradient(circle_at_top,rgba(45,212,191,0.16),transparent_68%)]" />
           <div className="relative space-y-3 sm:space-y-5">
             <div className="border-b border-slate-200/80 pb-3 sm:pb-5">
               <div>
