@@ -1,4 +1,4 @@
-# Payment Form - Assignment
+# Payment Gateway - Assignment
 
 A client-side payment form built with Next.js 16 App Router, TypeScript, Tailwind CSS v4, shadcn/ui, and Zustand.
 
